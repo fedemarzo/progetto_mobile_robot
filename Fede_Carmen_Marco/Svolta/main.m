@@ -1,6 +1,8 @@
 clear all
 close all
 clc
+%% NOTE
+%dimensione stanza come input e anche robot size
 %% Generazione del workspace e degli ostacoli 
 
 raggio_disco = 5;
@@ -46,8 +48,7 @@ t=1;% Istante di tempo.
     robot_start =start_point;
     
     % Il robot ha forma circolare, di raggio scelto dall'utente.
-    rectangle('Position',[start_point(1)-raggio_disco, start_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco], 'EdgeColor', 'r', 'FaceColor', 'r');
-    
+    rectangle('Position',[start_point(1)-raggio_disco, start_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco],'Curvature',[1 1], 'EdgeColor', 'r', 'FaceColor', 'r');
     % Scelgo la goal pose
     disp('Selezionare la posizione di arrivo ');
     end_point = ginput(1);
@@ -63,6 +64,12 @@ t=1;% Istante di tempo.
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
     
-%% Generazione del diagramma di Voronoi
-
-
+% %% Generazione del diagramma di Voronoi
+        updated_map = algoritmo_minkowski(raggio_disco, clearance, stanza);
+        [GVD]= rescale(del2(updated_map))<0.5;
+        %Remove spurious pixels
+        GVD = bwmorph(GVD,'spur');
+        GVD = bwmorph(GVD,'thin');
+        GVD = bwmorph(GVD,'clean');
+        GVD=bwareaopen(GVD,20);
+        
