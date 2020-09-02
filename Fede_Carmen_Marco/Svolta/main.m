@@ -64,12 +64,41 @@ t=1;% Istante di tempo.
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
     
-% %% Generazione del diagramma di Voronoi
+%% Generazione del diagramma di Voronoi
         updated_map = algoritmo_minkowski(raggio_disco, clearance, stanza);
-        [GVD]= rescale(del2(updated_map))<0.5;
+        updated_map_robot = updated_map(:,:,t,1);
+        
+        GVD_temp = updated_map_robot;
+        updated_map_robot_temp = bwdist(1-GVD_temp);
+
+
+        [GVD]= rescale(del2(updated_map_robot_temp))<0.5;
         %Remove spurious pixels
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
         GVD=bwareaopen(GVD,20);
         
+       [junction_points, updated_map_robot] = CVD_prima_mappa(GVD, updated_map_robot); % Modifica il nome che CVD non esiste
+       % junctions points sono le coordinate rispetto alla stanza dei
+       % vertici del diagramma di Voronoi 
+% 
+%        figure(4)
+%        imshow(GVD)
+%        hold on
+%        for i=1:1:size(junction_points,1)
+%            plot((junction_points(i,1)),(junction_points(i,2)),'*');
+%        end
+%        hold on
+%        for i=1:1:size(removed_centers,1)
+%            plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
+%        end
+%        
+%     [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = crea_cerchi_testimoni(junction_points,updated_map_robot);
+% 
+%             GVD(removed_centers) = 1; % prova a toglierlo
+%             
+%            roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
+% 
+% 
+%         
