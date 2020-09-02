@@ -59,7 +59,7 @@ t=1;% Istante di tempo.
         end_point= ginput(1);
     end
     
-    robots_end = end_point;%
+    robot_end = end_point;%
     
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
@@ -79,26 +79,44 @@ t=1;% Istante di tempo.
         GVD = bwmorph(GVD,'clean');
         GVD=bwareaopen(GVD,20);
         
+
        [junction_points, updated_map_robot] = CVD_prima_mappa(GVD, updated_map_robot); % Modifica il nome che CVD non esiste
-       % junctions points sono le coordinate rispetto alla stanza dei
-       % vertici del diagramma di Voronoi 
-% 
-%        figure(4)
-%        imshow(GVD)
-%        hold on
-%        for i=1:1:size(junction_points,1)
-%            plot((junction_points(i,1)),(junction_points(i,2)),'*');
-%        end
-%        hold on
-%        for i=1:1:size(removed_centers,1)
-%            plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
-%        end
-%        
-%     [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = crea_cerchi_testimoni(junction_points,updated_map_robot);
-% 
-%             GVD(removed_centers) = 1; % prova a toglierlo
-%             
-%            roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
-% 
-% 
-%         
+%        % junctions points sono le coordinate rispetto alla stanza dei
+%        % vertici del diagramma di Voronoi 
+       [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = crea_cerchi_testimoni(junction_points,updated_map_robot);
+       
+       figure(2)
+       imshow(GVD)
+       hold on
+       for i=1:1:size(junction_points,1)
+           plot((junction_points(i,1)),(junction_points(i,2)),'*');
+       end
+       hold on
+       for i=1:1:size(removed_centers,1)
+           plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
+       end
+       
+            GVD(removed_centers) = 1; % prova a toglierlo
+            
+        roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
+        [y,x]=find(~(roadmap==0 | roadmap==1));
+
+
+ figure(3)     
+   imshow(GVD)
+   hold on
+   plot((robot_start(1,1)),(robot_start(1,2)),'d');
+   hold on
+   plot((robot_end(1,1)),(robot_end(1,2)),'o');
+   hold on
+   plot((GVD_start(1,1)),(GVD_start(1,2)),'d');
+   hold on
+    plot((GVD_end(1,1)),(GVD_end(1,2)),'o');
+         GVD_end = punto_GVD_vicino(robot_end,x,y);
+         GVD_start = punto_GVD_vicino(robot_start,x,y);% trova il punto del GVD più vicino alla posa di start/goal
+         
+         figure(4)
+for i=1:1:size(x,1)
+    plot(x(i,1),y(i,1),'.');
+    hold on
+end
