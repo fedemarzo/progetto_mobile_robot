@@ -1,4 +1,4 @@
-function [junction_points, updated_map_robot] = CVD_prima_mappa(GVD, updated_map_robot)
+function [junction_points, updated_map_robot] = vertici_diagramma(GVD, updated_map_robot)
 
 % For testing purposes
 %find junction points in image

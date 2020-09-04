@@ -152,7 +152,6 @@ while(end_sim==0)
         %point
         if GVD_start_flags(i,1)==0
             [GVD_start] = nearest_point(curr_pos(i,:), x, y);
-            
             if abs((GVD_start(1,1)-curr_pos(i,1)))>0.01
                 slope=(GVD_start(1,2)-curr_pos(i,2))/(GVD_start(1,1)-curr_pos(i,1));
                 c=curr_pos(i,2)- slope*curr_pos(i,1);

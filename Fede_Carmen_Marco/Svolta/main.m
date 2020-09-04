@@ -7,7 +7,7 @@ clc
 
 raggio_disco = 5;
 clearance = 2;
-CVD_robots = [];
+% CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
 hfig=figure(1); % Plot  Workspace
 imshow(stanza,[]); % Mostra the Workspace
@@ -72,132 +72,71 @@ t=1;% Istante di tempo.
         updated_map_robot_temp = bwdist(1-GVD_temp);
 
 
-        [GVD]= rescale(del2(updated_map_robot_temp))<0.5;
+        [GVD]= rescale(del2(updated_map_robot_temp))<0.5; % con questo comando quando 
+        %i valori sono minori della metà del range sono settati a 0, quando
+        %maggiori sono settati a 1. 
         %Remove spurious pixels
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
         GVD=bwareaopen(GVD,20);
         
-
-       [junction_points, updated_map_robot] = CVD_prima_mappa(GVD, updated_map_robot); % Modifica il nome che CVD non esiste
-%        % junctions points sono le coordinate rispetto alla stanza dei
-%        % vertici del diagramma di Voronoi 
-       [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = crea_cerchi_testimoni(junction_points,updated_map_robot);
-       
-       roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
-       [y,x]=find(~(roadmap==0 | roadmap==1));
-       GVD_end   = punto_GVD_vicino(robot_end,x,y);
-       GVD_start = punto_GVD_vicino(robot_start,x,y);% trova il punto del GVD più vicino alla posa di start/goal
-      
-       
-       figure(2)
-       imshow(GVD)
-       hold on
-       for i=1:1:size(junction_points,1)
-           plot((junction_points(i,1)),(junction_points(i,2)),'*');
-       end
-%        hold on
-%        for i=1:1:size(removed_centers,1)
-%            plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
-%        end
-%        
-%             GVD(removed_centers) = 1; % prova a toglierlo
-            
-       
- figure(3)     
-   imshow(GVD)
-   hold on
-   plot((robot_start(1,1)),(robot_start(1,2)),'d');
-   hold on
-   plot((robot_end(1,1)),(robot_end(1,2)),'o');
-   hold on
-   plot((GVD_start(1,1)),(GVD_start(1,2)),'d');
-   hold on
-    plot((GVD_end(1,1)),(GVD_end(1,2)),'o');
-         
-         
-
-curr_pos=robot_start;
-GVD_start_flags= 0;
-GVD_end_flags=0;
-goal_complete_flag=0;
-%flag for simulation end
-end_sim = 0;
-
-
-if abs((GVD_start(1,1)-curr_pos(1,1)))>0.01
-                slope=(GVD_start(1,2)-curr_pos(1,2))/(GVD_start(1,1)-curr_pos(1,1));
-                c=curr_pos(1,2)- slope*curr_pos(1,1);
-                if(curr_pos(1,1) < GVD_start(1,1))
-                    k = 1;
-                else
-                    k = -1;
-                end
-                curr_pos(1,:) =  [curr_pos(1,1)+k, slope*(curr_pos(1,1)+k)+c];
-            else
-                 if(curr_pos(1,1) < GVD_start(1,1))
-                    k = 1;
-                else
-                    k = -1;
-                end
-                curr_pos(1,:)=[curr_pos(1,1), curr_pos(1,2)+k];
-            end
-                if pdist([curr_pos(1,:);GVD_start],'euclidean')<0.1
-                    GVD_start_flag=1;
-                end
-                %traverse on the roadmap till the closes point on roadmap
-                %to goal is reached
-           if GVD_end_flags==0
-            [curr_pos(1,:), x, y] = next_point(curr_pos(1,:), x, y, GVD_end);
-            if pdist([curr_pos(1,:);GVD_end],'euclidean')<0.1
-                GVD_end_flags(1,1)=1;
-            end
-            
-            
-            
-            
-                 %traverse line joining closest point on roadmap to goal, by traversing the line  
-        elseif goal_complete_flags(1,1)==0
-            if abs((curr_pos(1,1)-end_point(1,1)))>0.01
-                slope=(curr_pos(1,2)-end_point(1,2))/(curr_pos(1,1)-end_point(1,1));
-                c=curr_pos(1,2)- slope*curr_pos(1,1);
-                if(end_point(1,1)<curr_pos(1,1))
-                    k=-1;
-                else
-                    k=1;
-                end
-                curr_pos(1,:) = [curr_pos(1,1)+k, slope*(curr_pos(1,1)+k)+c];
-            else
-                if(end_point(1,1)<curr_pos(1,1))
-                    k=-1;
-                else
-                    k=1;
-                end
-                curr_pos(1,:)=[curr_pos(1,1), curr_pos(1,2)+k];
-            end
-               %check if the goal has been reached
-            if pdist([curr_pos(1,:);end_point],'euclidean')<1
-                goal_complete_flags(1,1)=1;
-            end
-
-    
-    
-
-    
-        end
-        disp('Robot moving in figure!');
-        figure(7)
-        imshow(roadmap)
-        hold on
-        %plot robot positions on roadmap
-        plot(curr_pos(1,1), curr_pos(1,2), 'b--O');
-        pause(0.1);
+%         figure(2) % mostra il diagramma di Voronoi su una mappa binaria della stanza
+%         imshow(GVD)
+%         hold on
+%         plot(robot_start(1,1),robot_start(1,2),'*');
+%         hold on
+%         plot(robot_end(1,1),robot_end(1,2),'d');
         
-       
-count = 0;
+%% Operazioni sul diagramma di Voronoi
 
-    
-        if goal_complete_flag==1
-            count=count+1;
-        end
+[x,y]=find((GVD==1 )); %trovo le coordinate del diagramma
+coordinate_diagramma=[x y];
+
+if GVD((floor(robot_start(1,1))),(floor(robot_start(1,2))))==1
+    GVD_start=robot_start;
+else
+    if GVD((floor(robot_end(1,1))),(floor(robot_end(1,2))))==1
+    GVD_end=robot_end;
+else
+    for i=1:1:size(coordinate_diagramma,1)
+    temp=coordinate_diagramma(i,:);
+    X=[temp; robot_start];
+    distanze_da_start(i)=pdist(X);
+end
+[distanza_start_min,indice_start_min]=min(distanze_da_start);
+GVD_start=coordinate_diagramma(indice_start_min,:);
+
+for i=1:1:size(coordinate_diagramma,1)
+    temp=coordinate_diagramma(i,:);
+    X=[temp;robot_end];
+    distanze_da_end(i)=pdist(X);
+end
+[distanza_end_min,indice_end_min]=min(distanze_da_end);
+GVD_end=coordinate_diagramma(indice_end_min,:);
+    end
+end
+figure(3)
+GVD_rev = ~GVD;
+map = binaryOccupancyMap(GVD_rev);
+show(map)
+hold on
+plot(robot_start(1,1),robot_start(1,2),'*');
+hold on
+plot(robot_end(1,1),robot_end(1,2),'d');
+hold on
+plot(GVD_start(1,1),GVD_start(1,2),'*');
+hold on
+plot(GVD_end(1,1),GVD_end(1,2),'d');
+%  figure(3)
+%  imshow(GVD)
+%  hold on
+%  for i=1:1:size(vertici_diagramma,1)
+%      plot((vertici_diagramma(i,1)),(vertici_diagramma(i,2)),'o');
+%  end
+
+ 
+
+
+     
+

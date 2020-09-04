@@ -166,7 +166,7 @@ voronoi(obstacle_positions(:,1),obstacle_positions(:,2))
 
 %% Cancellazione dei dati del diagramma fuori range
 
-[vx_range,vy_range,vertici_diagramma_range]=out_range(vx,vy,vertici_diagramma,map_size_x,map_size_y);
+[vx_range,vy_range,vertici_diagramma_range]=elimina_dati_fuori_range (vx,vy,vertici_diagramma,map_size_x,map_size_y);
 
 %% Algoritmo di ricerca del percorso
 %Calcolo il costo per ogni edge del diagramma di voronoi, che equivale alla
