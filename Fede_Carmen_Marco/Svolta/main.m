@@ -85,23 +85,26 @@ t=1;% Istante di tempo.
 %        % vertici del diagramma di Voronoi 
        [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = crea_cerchi_testimoni(junction_points,updated_map_robot);
        
+       roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
+       [y,x]=find(~(roadmap==0 | roadmap==1));
+       GVD_end   = punto_GVD_vicino(robot_end,x,y);
+       GVD_start = punto_GVD_vicino(robot_start,x,y);% trova il punto del GVD più vicino alla posa di start/goal
+      
+       
        figure(2)
        imshow(GVD)
        hold on
        for i=1:1:size(junction_points,1)
            plot((junction_points(i,1)),(junction_points(i,2)),'*');
        end
-       hold on
-       for i=1:1:size(removed_centers,1)
-           plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
-       end
-       
-            GVD(removed_centers) = 1; % prova a toglierlo
+%        hold on
+%        for i=1:1:size(removed_centers,1)
+%            plot((removed_centers(i,1)),(removed_centers(i,2)),'o');
+%        end
+%        
+%             GVD(removed_centers) = 1; % prova a toglierlo
             
-        roadmap = crea_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
-        [y,x]=find(~(roadmap==0 | roadmap==1));
-
-
+       
  figure(3)     
    imshow(GVD)
    hold on
@@ -112,11 +115,89 @@ t=1;% Istante di tempo.
    plot((GVD_start(1,1)),(GVD_start(1,2)),'d');
    hold on
     plot((GVD_end(1,1)),(GVD_end(1,2)),'o');
-         GVD_end = punto_GVD_vicino(robot_end,x,y);
-         GVD_start = punto_GVD_vicino(robot_start,x,y);% trova il punto del GVD più vicino alla posa di start/goal
          
-         figure(4)
-for i=1:1:size(x,1)
-    plot(x(i,1),y(i,1),'.');
-    hold on
-end
+         
+
+curr_pos=robot_start;
+GVD_start_flags= 0;
+GVD_end_flags=0;
+goal_complete_flag=0;
+%flag for simulation end
+end_sim = 0;
+
+
+if abs((GVD_start(1,1)-curr_pos(1,1)))>0.01
+                slope=(GVD_start(1,2)-curr_pos(1,2))/(GVD_start(1,1)-curr_pos(1,1));
+                c=curr_pos(1,2)- slope*curr_pos(1,1);
+                if(curr_pos(1,1) < GVD_start(1,1))
+                    k = 1;
+                else
+                    k = -1;
+                end
+                curr_pos(1,:) =  [curr_pos(1,1)+k, slope*(curr_pos(1,1)+k)+c];
+            else
+                 if(curr_pos(1,1) < GVD_start(1,1))
+                    k = 1;
+                else
+                    k = -1;
+                end
+                curr_pos(1,:)=[curr_pos(1,1), curr_pos(1,2)+k];
+            end
+                if pdist([curr_pos(1,:);GVD_start],'euclidean')<0.1
+                    GVD_start_flag=1;
+                end
+                %traverse on the roadmap till the closes point on roadmap
+                %to goal is reached
+           if GVD_end_flags==0
+            [curr_pos(1,:), x, y] = next_point(curr_pos(1,:), x, y, GVD_end);
+            if pdist([curr_pos(1,:);GVD_end],'euclidean')<0.1
+                GVD_end_flags(1,1)=1;
+            end
+            
+            
+            
+            
+                 %traverse line joining closest point on roadmap to goal, by traversing the line  
+        elseif goal_complete_flags(1,1)==0
+            if abs((curr_pos(1,1)-end_point(1,1)))>0.01
+                slope=(curr_pos(1,2)-end_point(1,2))/(curr_pos(1,1)-end_point(1,1));
+                c=curr_pos(1,2)- slope*curr_pos(1,1);
+                if(end_point(1,1)<curr_pos(1,1))
+                    k=-1;
+                else
+                    k=1;
+                end
+                curr_pos(1,:) = [curr_pos(1,1)+k, slope*(curr_pos(1,1)+k)+c];
+            else
+                if(end_point(1,1)<curr_pos(1,1))
+                    k=-1;
+                else
+                    k=1;
+                end
+                curr_pos(1,:)=[curr_pos(1,1), curr_pos(1,2)+k];
+            end
+               %check if the goal has been reached
+            if pdist([curr_pos(1,:);end_point],'euclidean')<1
+                goal_complete_flags(1,1)=1;
+            end
+
+    
+    
+
+    
+        end
+        disp('Robot moving in figure!');
+        figure(7)
+        imshow(roadmap)
+        hold on
+        %plot robot positions on roadmap
+        plot(curr_pos(1,1), curr_pos(1,2), 'b--O');
+        pause(0.1);
+        
+       
+count = 0;
+
+    
+        if goal_complete_flag==1
+            count=count+1;
+        end
