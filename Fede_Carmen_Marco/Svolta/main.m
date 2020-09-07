@@ -30,10 +30,6 @@ hold on;
 
 matrice_check=zeros(500,500);
 
-for i=robot_start(2)-raggio_disco:1:robot_start(2)+raggio_disco
-matrice_check(robot_start(1)-raggio_disco:robot_start(1)+raggio_disco,i)=1;
-end
-
 robot_start = []; % Inizializzate 
 robot_end = [];
 
@@ -75,6 +71,16 @@ t=1;% Istante di tempo.
     
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
+    
+%  for i=robot_start(2)-raggio_disco:1:robot_start(2)+raggio_disco
+%     matrice_check(robot_start(1)-raggio_disco:robot_start(1)+raggio_disco,i)=1;
+%  end
+
+Z = zeros(500); 
+origin = [robot_start(1) robot_start(2)]; %centro della matrice
+[xx,yy] = meshgrid((1:size(Z,2))-origin(1),(1:size(Z,1))-origin(2)); % create x and y grid
+Z(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
+ 
     
 %% Generazione del diagramma di Voronoi
         updated_map = algoritmo_minkowski(raggio_disco, clearance, stanza);
