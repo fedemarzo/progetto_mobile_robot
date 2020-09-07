@@ -5,7 +5,7 @@ clc
 %dimensione stanza come input e anche robot size
 %% Generazione del workspace e degli ostacoli 
 
-raggio_disco = 5;
+raggio_disco = 50;
 clearance = 1;
 % CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
@@ -27,6 +27,12 @@ imshow(stanza,[]); % Mostro il nuovo workspace aggiornato
 
 hold on;
 %% Definizione della start e goal pose
+
+matrice_check=zeros(500,500);
+
+for i=robot_start(2)-raggio_disco:1:robot_start(2)+raggio_disco
+matrice_check(robot_start(1)-raggio_disco:robot_start(1)+raggio_disco,i)=1;
+end
 
 robot_start = []; % Inizializzate 
 robot_end = [];
@@ -50,18 +56,21 @@ t=1;% Istante di tempo.
     
     % Il robot ha forma circolare, di raggio scelto dall'utente.
     rectangle('Position',[start_point(1)-raggio_disco, start_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco],'Curvature',[1 1], 'EdgeColor', 'r', 'FaceColor', 'r');
+    
     % Scelgo la goal pose
     disp('Selezionare la posizione di arrivo ');
     end_point = ginput(1);
     
     % Controllo la posizione corretta
-    while(~(end_point(1)+raggio_disco <= stanza_dim(1) && end_point(2)+raggio_disco <=stanza_dim(2) && end_point(1)-raggio_disco>=1 && end_point(2)-raggio_disco>=1))
+    while(~(end_point(1)+raggio_disco <= stanza_dim(1) || end_point(2)+raggio_disco <=stanza_dim(2) || end_point(1)-raggio_disco>=1 || end_point(2)-raggio_disco>=1))
         disp('Posizione di arrivo non ammissibile. Selezionarne una nuova')
         end_point= ginput(1);
     end
     
     robot_end = end_point;%
     robot_end=round(robot_end);
+
+    rectangle('Position',[end_point(1)-raggio_disco, end_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco],'Curvature',[1 1], 'EdgeColor', 'b', 'FaceColor', 'b');
 
     
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
