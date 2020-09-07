@@ -6,11 +6,11 @@ clc
 %% Generazione del workspace e degli ostacoli 
 
 raggio_disco = 5;
-clearance = 2;
+clearance = 1;
 % CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
-hfig=figure(1); % Plot  Workspace
-imshow(stanza,[]); % Mostra the Workspace
+% hfig=figure(1); % Plot  Workspace
+% imshow(stanza,[]); % Mostra the Workspace
 
 numero_ostacoli=input('Inserire il numero di ostacoli: ');
 disp('Disegnare i poligoni sulla figura. Doppio click su ogni poligono dopo aver selezionato al ROI per andare avanti: ');
@@ -46,6 +46,7 @@ t=1;% Istante di tempo.
     
     % Aggiorno la posa del robot con i dati di input 
     robot_start =start_point;
+    robot_start=round(robot_start);
     
     % Il robot ha forma circolare, di raggio scelto dall'utente.
     rectangle('Position',[start_point(1)-raggio_disco, start_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco],'Curvature',[1 1], 'EdgeColor', 'r', 'FaceColor', 'r');
@@ -60,6 +61,8 @@ t=1;% Istante di tempo.
     end
     
     robot_end = end_point;%
+    robot_end=round(robot_end);
+
     
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
@@ -81,61 +84,104 @@ t=1;% Istante di tempo.
         GVD = bwmorph(GVD,'clean');
         GVD=bwareaopen(GVD,20);
         
-%         figure(2) % mostra il diagramma di Voronoi su una mappa binaria della stanza
-%         imshow(GVD)
-%         hold on
-%         plot(robot_start(1,1),robot_start(1,2),'*');
-%         hold on
-%         plot(robot_end(1,1),robot_end(1,2),'d');
+
         
 %% Operazioni sul diagramma di Voronoi
 
 [x,y]=find((GVD==1 )); %trovo le coordinate del diagramma
 coordinate_diagramma=[x y];
 
-if GVD((floor(robot_start(1,1))),(floor(robot_start(1,2))))==1
-    GVD_start=robot_start;
-else
-    if GVD((floor(robot_end(1,1))),(floor(robot_end(1,2))))==1
-    GVD_end=robot_end;
-else
-    for i=1:1:size(coordinate_diagramma,1)
-    temp=coordinate_diagramma(i,:);
-    X=[temp; robot_start];
-    distanze_da_start(i)=pdist(X);
-end
-[distanza_start_min,indice_start_min]=min(distanze_da_start);
-GVD_start=coordinate_diagramma(indice_start_min,:);
+%     for i=1:1:size(coordinate_diagramma,1)
+%         for j=size(coordinate_diagramma,2):-1:1
+%       distanze_da_start(i)=sqrt((((coordinate_diagramma(i,1))-(robot_start(1)))^2)+(((coordinate_diagramma(j,2))-(robot_start(2)))^2));
+%         end
+%     end
+%       
+% [distanza_start_min,indice_start_min]=min(distanze_da_start);
+% GVD_start=coordinate_diagramma(indice_start_min,:);
+% 
+% for i=1:1:size(coordinate_diagramma,1)
+%     for j=size(coordinate_diagramma,2):-1:1
+%        
+%       distanze_da_end(i)=sqrt((((coordinate_diagramma(i,1))-(robot_end(1)))^2)+(((coordinate_diagramma(j,2))-(robot_end(2)))^2));
+%     end
+% end
+% [distanza_end_min,indice_end_min]=min(distanze_da_end);
+% GVD_end=coordinate_diagramma(indice_end_min,:);
 
-for i=1:1:size(coordinate_diagramma,1)
-    temp=coordinate_diagramma(i,:);
-    X=[temp;robot_end];
-    distanze_da_end(i)=pdist(X);
-end
-[distanza_end_min,indice_end_min]=min(distanze_da_end);
-GVD_end=coordinate_diagramma(indice_end_min,:);
-    end
-end
+%% trovo nearest point
+%mask = bwareafilt(GVD, 1); % Make sure there is only one blob.
+boundaries = bwboundaries(GVD);
+boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
+% Find rows
+yRows = boundaries(:, 1);
+% Find columns (x)
+xColumns = boundaries(:, 2);
+% Find distances from (x1, y1) to all other points.
+distances = sqrt((xColumns - robot_start(1)).^2 + (yRows - robot_start(2)).^2);
+% Find the closest
+[minDistance, indexOfMin] = min(distances);
+% Find the coordinates
+GVD_start(1) = xColumns(indexOfMin);
+GVD_start(2) = yRows(indexOfMin);
+
+% Find distances from (x2, y2) to all other points.
+distances2 = sqrt((xColumns - robot_end(1)).^2 + (yRows - robot_end(2)).^2);
+% Find the closest
+[minDistance2, indexOfMin2] = min(distances2);
+% Find the coordinates
+GVD_end(1) = xColumns(indexOfMin2);
+GVD_end(2) = yRows(indexOfMin2);
+
+
+figure(2)
+imshow(GVD)
+hold on
+plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
+hold on
+plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
+hold on
+plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+hold on
+plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+
+
+% figure(4)
+% GVD_rev = ~GVD;
+% map = binaryOccupancyMap(GVD_rev);
+% map.LocalOriginInWorld=[0.5 0.5];
+% show(map)
+% hold on
+% plot(robot_start(1,1),robot_start(1,2),'*');
+% hold on
+% plot(robot_end(1,1),robot_end(1,2),'d');
+% hold on
+% plot(GVD_start(1,1),GVD_start(1,2),'*');
+% hold on
+% plot(GVD_end(1,1),GVD_end(1,2),'d');
+
 figure(3)
-GVD_rev = ~GVD;
-map = binaryOccupancyMap(GVD_rev);
-show(map)
-hold on
-plot(robot_start(1,1),robot_start(1,2),'*');
-hold on
-plot(robot_end(1,1),robot_end(1,2),'d');
-hold on
-plot(GVD_start(1,1),GVD_start(1,2),'*');
-hold on
-plot(GVD_end(1,1),GVD_end(1,2),'d');
-%  figure(3)
-%  imshow(GVD)
-%  hold on
-%  for i=1:1:size(vertici_diagramma,1)
-%      plot((vertici_diagramma(i,1)),(vertici_diagramma(i,2)),'o');
-%  end
 
- 
+hold on
+plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
+plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
+hold off
+D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
+D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
+
+D = D1 + D2;
+D = round(D * 8) / 8;
+
+D(isnan(D)) = inf;
+skeleton_path = imregionalmin(D);
+P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0]);
+imshow(P, 'InitialMagnification', 200)
+hold on
+plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
+plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
+hold off
+path_length = D(skeleton_path);
+path_length = path_length(1)
 
 
      
