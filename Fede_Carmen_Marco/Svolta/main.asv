@@ -26,7 +26,7 @@ stanza = stanza.stanza;
 imshow(stanza,[]); % Mostro il nuovo workspace aggiornato
 
 hold on;
-%% Definizione della start e goal pose
+%% Definizione della start pose
 
 matrice_robot=zeros(500,500);
 
@@ -51,7 +51,7 @@ bool=1;
 if (start_point(1)+raggio_disco <= stanza_dim(1) && start_point(2)+raggio_disco <=stanza_dim(2) && start_point(1)-raggio_disco>=1 && start_point(2)-raggio_disco>=1)
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
-if (matrice_robot(i,j)&ostacoli(i,j)==1)
+if (matrice_robot(i,j)&(~stanza(i,j)==1))
 bool=0;
 else
 continue
@@ -77,7 +77,7 @@ matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla mat
 bool=1;
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
-if (matrice_robot(i,j)&ostacoli(i,j)==1)
+if (matrice_robot(i,j)&(~stanza(i,j)==1))
 bool=0;
 else
 continue
@@ -95,7 +95,7 @@ end
     rectangle('Position',[start_point(1)-raggio_disco, start_point(2)-raggio_disco, 2*raggio_disco, 2*raggio_disco],'Curvature',[1 1], 'EdgeColor', 'r', 'FaceColor', 'r');
   
     
-    
+%% Definizione della goal pose   
  % Scelgo la goal pose
     disp('Selezionare la posizione di arrivo ');
     end_point = ginput(1);
@@ -111,7 +111,7 @@ bool=1;
 if (end_point(1)+raggio_disco <= stanza_dim(1) && end_point(2)+raggio_disco <=stanza_dim(2) && end_point(1)-raggio_disco>=1 && end_point(2)-raggio_disco>=1)
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
-if (matrice_robot(i,j)&ostacoli(i,j)==1)
+if (matrice_robot(i,j)&(~stanza(i,j)==1))
 bool=0;
 else
 continue
@@ -137,7 +137,7 @@ matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla mat
 bool=1;
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
-if (matrice_robot(i,j)&ostacoli(i,j)==1)
+if (matrice_robot(i,j)&(~stanza(i,j)==1))
 bool=0;
 else
 continue
@@ -238,7 +238,7 @@ check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
 
 if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
-    disp('Percorso non ammissibile')
+    msgbox('Percorso non ammissibile')
     close (figure(3), figure(2))   
 else
 
@@ -251,6 +251,15 @@ hold off
 path_length = D(skeleton_path);
 path_length = path_length(1)
 
+
+%% ANIMAZIONE 
+
+figure (4)
+imshow(P)
+hold on
+for i=1:1:size(percorso,1)
+    plot(percorso(i,1),percorso(i,2),'o','MarkerSize',9),hold all
+    drawnow, pause(0.5)
 end
-
-
+set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
+end
