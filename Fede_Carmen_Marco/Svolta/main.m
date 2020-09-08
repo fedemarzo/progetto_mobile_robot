@@ -48,7 +48,7 @@ t=1;% Istante di tempo.
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
 bool=1;
-
+if (start_point(1)+raggio_disco <= stanza_dim(1) && start_point(2)+raggio_disco <=stanza_dim(2) && start_point(1)-raggio_disco>=1 && start_point(2)-raggio_disco>=1)
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -57,6 +57,9 @@ else
 continue
 end
 end
+end
+else
+    bool=0;
 end
 
 if bool==0
@@ -105,7 +108,7 @@ end
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
 bool=1;
-
+if (end_point(1)+raggio_disco <= stanza_dim(1) && end_point(2)+raggio_disco <=stanza_dim(2) && end_point(1)-raggio_disco>=1 && end_point(2)-raggio_disco>=1)
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -114,6 +117,9 @@ else
 continue
 end
 end
+end
+else
+    bool=0;
 end
 
 if bool==0
@@ -231,9 +237,9 @@ percorso=[yp,xp];
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
 
-if (pdist(check1)>stanza_dim(1)*0.1 || pdist(check2)>stanza_dim(1)*0.1)
-    disp('Percorso non ammissibile')
-    close (figure(3))   
+if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
+    msgbox('Percorso non ammissibile')
+    close (figure(3), figure(2))   
 else
 
 P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0]);
