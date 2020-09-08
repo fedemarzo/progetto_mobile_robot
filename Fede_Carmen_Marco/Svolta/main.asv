@@ -170,8 +170,28 @@ end
         
 %% Operazioni sul diagramma di Voronoi
 
-%Trovo nearest point 
+[x,y]=find((GVD==1 )); %trovo le coordinate del diagramma
+coordinate_diagramma=[x y];
 
+%     for i=1:1:size(coordinate_diagramma,1)
+%         for j=size(coordinate_diagramma,2):-1:1
+%       distanze_da_start(i)=sqrt((((coordinate_diagramma(i,1))-(robot_start(1)))^2)+(((coordinate_diagramma(j,2))-(robot_start(2)))^2));
+%         end
+%     end
+%       
+% [distanza_start_min,indice_start_min]=min(distanze_da_start);
+% GVD_start=coordinate_diagramma(indice_start_min,:);
+% 
+% for i=1:1:size(coordinate_diagramma,1)
+%     for j=size(coordinate_diagramma,2):-1:1
+%        
+%       distanze_da_end(i)=sqrt((((coordinate_diagramma(i,1))-(robot_end(1)))^2)+(((coordinate_diagramma(j,2))-(robot_end(2)))^2));
+%     end
+% end
+% [distanza_end_min,indice_end_min]=min(distanze_da_end);
+% GVD_end=coordinate_diagramma(indice_end_min,:);
+
+%% trovo nearest point
 %mask = bwareafilt(GVD, 1); % Make sure there is only one blob.
 boundaries = bwboundaries(GVD);
 boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
