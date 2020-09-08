@@ -47,7 +47,8 @@ t=1;% Istante di tempo.
     origin = [robot_start(1) robot_start(2)]; %centro della matrice
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
- 
+bool=1;
+
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -103,7 +104,8 @@ end
     origin = [robot_end(1) robot_end(2)]; %centro della matrice
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
- 
+bool=1;
+
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -222,6 +224,18 @@ D = round(D * 8) / 8;
 
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
+
+[xp,yp]=find(skeleton_path==1);
+percorso=[yp,xp];
+
+check1=[GVD_start ; robot_start];
+check2=[GVD_end ; robot_end];
+
+if (pdist(check1)>stanza_dim(1)*0.1 || pdist(check2)>stanza_dim(1)*0.1)
+    disp('Percorso non ammissibile')
+    close (figure(3))   
+else
+
 P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0]);
 imshow(P, 'InitialMagnification', 200)
 hold on
@@ -231,6 +245,6 @@ hold off
 path_length = D(skeleton_path);
 path_length = path_length(1)
 
+end
 
-     
 

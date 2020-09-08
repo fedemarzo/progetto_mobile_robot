@@ -47,7 +47,8 @@ t=1;% Istante di tempo.
     origin = [robot_start(1) robot_start(2)]; %centro della matrice
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
- 
+bool=1;
+
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -103,7 +104,8 @@ end
     origin = [robot_end(1) robot_end(2)]; %centro della matrice
 [xx,yy] = meshgrid((1:size(matrice_robot,2))-origin(1),(1:size(matrice_robot,1))-origin(2)); % create x and y grid
 matrice_robot(sqrt(xx.^2 + yy.^2) <= raggio_disco) = 1; % punti interni alla matrice =1
- 
+bool=1;
+
 for i=1:1:size(stanza,1)
 for j=1:1:size(stanza,2)
 if (matrice_robot(i,j)&ostacoli(i,j)==1)
@@ -170,28 +172,8 @@ end
         
 %% Operazioni sul diagramma di Voronoi
 
-[x,y]=find((GVD==1 )); %trovo le coordinate del diagramma
-coordinate_diagramma=[x y];
+%Trovo nearest point 
 
-%     for i=1:1:size(coordinate_diagramma,1)
-%         for j=size(coordinate_diagramma,2):-1:1
-%       distanze_da_start(i)=sqrt((((coordinate_diagramma(i,1))-(robot_start(1)))^2)+(((coordinate_diagramma(j,2))-(robot_start(2)))^2));
-%         end
-%     end
-%       
-% [distanza_start_min,indice_start_min]=min(distanze_da_start);
-% GVD_start=coordinate_diagramma(indice_start_min,:);
-% 
-% for i=1:1:size(coordinate_diagramma,1)
-%     for j=size(coordinate_diagramma,2):-1:1
-%        
-%       distanze_da_end(i)=sqrt((((coordinate_diagramma(i,1))-(robot_end(1)))^2)+(((coordinate_diagramma(j,2))-(robot_end(2)))^2));
-%     end
-% end
-% [distanza_end_min,indice_end_min]=min(distanze_da_end);
-% GVD_end=coordinate_diagramma(indice_end_min,:);
-
-%% trovo nearest point
 %mask = bwareafilt(GVD, 1); % Make sure there is only one blob.
 boundaries = bwboundaries(GVD);
 boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
@@ -242,6 +224,18 @@ D = round(D * 8) / 8;
 
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
+
+[xp,yp]=find(skeleton_path==1);
+percorso=[yp,xp];
+
+check1=[GVD_start ; robot_start];
+check2=[GVD_end ; robot_end];
+
+if (pdist(check1)>stdim_stanza(1)*0.1 || pdist(check2)>dim_stanza(1)*0.1)
+    disp('Percorso non ammissibile')
+    close (figure(3))   
+else
+
 P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0]);
 imshow(P, 'InitialMagnification', 200)
 hold on
@@ -251,6 +245,6 @@ hold off
 path_length = D(skeleton_path);
 path_length = path_length(1)
 
+end
 
-     
 
