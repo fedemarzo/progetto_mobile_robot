@@ -172,8 +172,12 @@ end
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
-        GVD=bwareaopen(GVD,20);
-        
+%         GVD=bwareaopen(GVD,20);
+   
+cc = regionprops(GVD,'Area');
+maxarea = max([cc.Area]);
+GVD = bwareaopen(GVD,maxarea);
+     
 
         
 %% Operazioni sul diagramma di Voronoi
@@ -254,12 +258,12 @@ path_length = path_length(1)
 
 %% ANIMAZIONE 
 
-figure (4)
-imshow(P)
-hold on
-for i=1:5:size(percorso,1)
-    plot(percorso(i,1),percorso(i,2),'o','MarkerSize',9),hold all
-    drawnow, pause(0.5)
-end
-set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
-end
+% figure (4)
+% imshow(P)
+% hold on
+% for i=1:5:size(percorso,1)
+%     plot(percorso(i,1),percorso(i,2),'o','MarkerSize',9),hold all
+%     drawnow, pause(0.5)
+% end
+% set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
+ end
