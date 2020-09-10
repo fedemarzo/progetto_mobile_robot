@@ -216,25 +216,17 @@ distances2 = sqrt((xColumns - robot_end(1)).^2 + (yRows - robot_end(2)).^2);
 GVD_end(1) = xColumns(indexOfMin2);
 GVD_end(2) = yRows(indexOfMin2);
 
- figure(2)
- imshow(~(~C_space|GVD))
-% imshow(GVD)
-% hold on
-% plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
-% hold on
-% plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
-% hold on
-% plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
-% hold on
-% plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+ 
 
 
-figure(3)
 
-hold on
-plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
-plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
-hold off
+
+% figure(3)
+% 
+% hold on
+% % plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
+% % plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
+% hold off
 D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
@@ -244,8 +236,13 @@ D = round(D * 8) / 8;
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
 
+% myColormap=[1,1,1;1,0,0];
+% skeleton_path_color=ind2rgb(skeleton_path,myColormap);
+
 [xp,yp]=find(skeleton_path==1);
 percorso=[yp,xp];
+
+
 
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
@@ -267,6 +264,22 @@ path_length = D(skeleton_path);
 path_length = path_length(1)
 
 
+
+figure(2)
+ imshow(~(~C_space|GVD))
+
+hold on
+plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
+
+plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
+
+plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+
+plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+
+percorso=[robot_end(2), robot_end(1),;percorso;robot_start(2) robot_start(1)];
+
+plot(percorso(:,1),percorso(:,2),'Color','r','LineWidth',3)
 %% ANIMAZIONE 
 
 % figure (4)
