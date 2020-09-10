@@ -158,7 +158,15 @@ end
     
     
 %% Generazione del diagramma di Voronoi
-        updated_map = algoritmo_minkowski(raggio_disco, clearance, stanza);
+        C_space= imdilate(~stanza, strel('disk',raggio_disco));
+        C_space=~C_space;
+        C_space(1:raggio_disco,:)=0;
+        C_space(:,1:raggio_disco)=0;
+        C_space(stanza_dim(1)-raggio_disco:stanza_dim(1),:)=0;
+        C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
+        
+
+        updated_map = algoritmo_minkowski(raggio_disco, clearance, C_space);
         updated_map_robot = updated_map(:,:,t,1);
         
         GVD_temp = updated_map_robot;
@@ -177,6 +185,7 @@ end
 cc = regionprops(GVD,'Area');
 maxarea = max([cc.Area]);
 GVD = bwareaopen(GVD,maxarea);
+        
      
 
         
@@ -207,17 +216,17 @@ distances2 = sqrt((xColumns - robot_end(1)).^2 + (yRows - robot_end(2)).^2);
 GVD_end(1) = xColumns(indexOfMin2);
 GVD_end(2) = yRows(indexOfMin2);
 
-
-figure(2)
-imshow(GVD)
-hold on
-plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
-hold on
-plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
-hold on
-plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
-hold on
-plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+ figure(2)
+ imshow(~(~C_space|GVD))
+% imshow(GVD)
+% hold on
+% plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
+% hold on
+% plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
+% hold on
+% plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+% hold on
+% plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 
 
 figure(3)
@@ -251,6 +260,8 @@ imshow(P, 'InitialMagnification', 200)
 hold on
 plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
 plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
+plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 hold off
 path_length = D(skeleton_path);
 path_length = path_length(1)
@@ -266,4 +277,4 @@ path_length = path_length(1)
 %     drawnow, pause(0.5)
 % end
 % set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
- end
+end

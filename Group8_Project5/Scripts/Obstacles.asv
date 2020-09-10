@@ -2,7 +2,7 @@ close all
 clear all
 clc
 %% Definitions
-size_of_robot = 10;
+size_of_robot = 5;
 clearance = 2;
 CVD_robots = [];
 %no_of_obstacles=input('Enter no. of obstacles: ');
@@ -126,8 +126,7 @@ while(end_sim==0)
         [delaunay_triangulation,junction_points,witness_circle_radii,removed_centers] = create_witness_circles(junction_points,updated_map_robot);
         GVD(removed_centers) = 1;
 
-       figure(2)
-imshow(delaunay_triangulation);
+%       figure(2);       imshow(delaunay_triangulation);
 %       hold on;
         %create roadmap from the triangulation adn GVD
         roadmap = create_roadmap(GVD, updated_map_robot_temp, updated_map_robot, delaunay_triangulation, junction_points);
