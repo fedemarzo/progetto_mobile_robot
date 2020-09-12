@@ -252,7 +252,7 @@ if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
     close (figure(3), figure(2))   
 else
 
-P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0]);
+P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0] );
 imshow(P, 'InitialMagnification', 200)
 hold on
 plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
@@ -261,27 +261,38 @@ plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
 plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 hold off
 path_length = D(skeleton_path);
-path_length = path_length(1)
+path_length = path_length(1);
 
-for i=1:1:size(percorso,1)
-
-    X=[percorso(i,:);robot_start];
-    dist(i)=pdist(X);
-end
- 
-[dist_min,index_start]=min(dist);
-percorso_up=[percorso(1:(index_start-1),:);robot_start;percorso((index_start):end,:)];
-
-
-
-for i=1:1:size(percorso_up,1)
-
-    Y=[percorso_up(i,:);robot_end];
-    dist_Y(i)=pdist(Y);
-end
- 
-[dist_min_Y,index_end]=min(dist_Y);
-percorso_up=[percorso_up(1:(index_end),:);robot_end;percorso((index_e+1):end,:)];
+% percorso_prova=percorso;
+% if GVD_start~=percorso_prova(1,:)
+% [tf,index]=ismember(GVD_start,percorso_prova,'rows');
+%  temp=percorso_prova(1,:);
+%  percorso_prova(1,:)=percorso_prova(index,:);
+%  percorso_prova(index,:)=temp;
+% end
+% 
+% % percorso_ret(1,:)=robot_start;
+% % percorso_ret(2,:)=GVD_start;
+% 
+% for i=1:1:(size(percorso_prova,1))-1
+%     for j=(i+1):1:(size(percorso_prova,1))-1
+%         
+%         X=[percorso_prova(i,:); percorso_prova(j,:)];
+%         dist(j)=pdist(X);
+%                       
+%     end
+%     
+%     [min_start,index_start]=min(dist);
+%     temp=percorso_prova(i+1,:);
+%         percorso_prova(i+1,:)=percorso_prova(index_start,:);
+%         percorso_prova(index_start,:)=temp;
+% end
+% 
+% 
+% idx = randsample(numel(percorso_prova(:,1)), numel(percorso_prova(:,1))); 
+% percorso_prova(:,1) = percorso_prova(idx,1); 
+% percorso_prova(:,2) = percorso_prova(idx,2);
+% plot(percorso_prova(idx,1),percorso_prova(idx,2),'*')
 
 figure(2)
 imshow(~(~C_space|GVD))
@@ -297,7 +308,12 @@ plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 
 % percorso=[robot_start(1) robot_start(2);percorso;robot_end(1), robot_end(2)];
 
-plot(percorso_up(:,1),percorso_up(:,2),'Color','r','LineWidth',3)
+plot(percorso(:,1),percorso(:,2),'o','color','r')
+hold on
+plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','LineWidth',3)
+plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',3)
+
+
 %% ANIMAZIONE 
 
 % figure (4)
