@@ -281,7 +281,7 @@ for i=1:1:size(percorso_up,1)
 end
  
 [dist_min_Y,index_end]=min(dist_Y);
-percorso_up=[percorso_up(1:(index_end),:);robot_end;percorso((index_end+1):end,:)];
+percorso_up=[percorso_up(1:(index_end),:);robot_end;percorso((index_e+1):end,:)];
 
 figure(2)
 imshow(~(~C_space|GVD))
