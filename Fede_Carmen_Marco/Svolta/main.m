@@ -218,15 +218,6 @@ GVD_end(2) = yRows(indexOfMin2);
 
  
 
-
-
-
-% figure(3)
-% 
-% hold on
-% % plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
-% % plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
-% hold off
 D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
@@ -236,13 +227,8 @@ D = round(D * 8) / 8;
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
 
-% myColormap=[1,1,1;1,0,0];
-% skeleton_path_color=ind2rgb(skeleton_path,myColormap);
-
 [xp,yp]=find(skeleton_path==1);
 percorso=[yp,xp];
-
-
 
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
@@ -263,36 +249,6 @@ hold off
 path_length = D(skeleton_path);
 path_length = path_length(1);
 
-% percorso_prova=percorso;
-% if GVD_start~=percorso_prova(1,:)
-% [tf,index]=ismember(GVD_start,percorso_prova,'rows');
-%  temp=percorso_prova(1,:);
-%  percorso_prova(1,:)=percorso_prova(index,:);
-%  percorso_prova(index,:)=temp;
-% end
-% 
-% % percorso_ret(1,:)=robot_start;
-% % percorso_ret(2,:)=GVD_start;
-% 
-% for i=1:1:(size(percorso_prova,1))-1
-%     for j=(i+1):1:(size(percorso_prova,1))-1
-%         
-%         X=[percorso_prova(i,:); percorso_prova(j,:)];
-%         dist(j)=pdist(X);
-%                       
-%     end
-%     
-%     [min_start,index_start]=min(dist);
-%     temp=percorso_prova(i+1,:);
-%         percorso_prova(i+1,:)=percorso_prova(index_start,:);
-%         percorso_prova(index_start,:)=temp;
-% end
-% 
-% 
-% idx = randsample(numel(percorso_prova(:,1)), numel(percorso_prova(:,1))); 
-% percorso_prova(:,1) = percorso_prova(idx,1); 
-% percorso_prova(:,2) = percorso_prova(idx,2);
-% plot(percorso_prova(idx,1),percorso_prova(idx,2),'*')
 
 figure(2)
 imshow(~(~C_space|GVD))
@@ -302,9 +258,9 @@ plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
 
 plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
 
-plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+plot(robot_start(1),robot_start(2),'d','MarkerSize',10)
 
-plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+plot(robot_end(1),robot_end(2),'d','MarkerSize',10)
 
 % percorso=[robot_start(1) robot_start(2);percorso;robot_end(1), robot_end(2)];
 
