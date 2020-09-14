@@ -6,10 +6,7 @@ clc
 %% Generazione del workspace e degli ostacoli 
 
 raggio_disco = 20;
-% CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
-% hfig=figure(1); % Plot  Workspace
-% imshow(stanza,[]); % Mostra the Workspace
 
 numero_ostacoli=input('Inserire il numero di ostacoli: ');
 disp('Disegnare i poligoni sulla figura. Doppio click su ogni poligono dopo aver selezionato al ROI per andare avanti: ');
@@ -168,11 +165,15 @@ end
         C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
         C_space = bwdist(1-C_space);
 
-% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale.
+% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale. del2
+% restituisce una matrice di uguale dimensione di C Space dove ogni
+% elemento è ottenuto come differenza dell'elemento di C space meno la
+% media dei 4 vicini. 
         [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
         %i valori sono minori della metà del range sono settati a 0, quando
-        %maggiori sono settati a 1. 
-        %Remove spurious pixels
+        %maggiori sono settati a 1. E' un valore logico, quindi 1 quando è
+        %vero e 0 quando è falso
+        %Filtraggio del diagramma di Voronoi appena calcolato 
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
@@ -181,39 +182,31 @@ end
 cc = regionprops(GVD,'Area');
 maxarea = max([cc.Area]);
 GVD = bwareaopen(GVD,maxarea);
-        
-     
-
-        
+           
 %% Operazioni sul diagramma di Voronoi
 
 %Trovo nearest point 
 
-%mask = bwareafilt(GVD, 1); % Make sure there is only one blob.
 boundaries = bwboundaries(GVD);
 boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
-% Find rows
+% Trovo le righe degli elementi di bordo del diagramma
 yRows = boundaries(:, 1);
-% Find columns (x)
+% Trovo le colonne
 xColumns = boundaries(:, 2);
-% Find distances from (x1, y1) to all other points.
+% Distanze da tutti gli altri punti .
 distances = sqrt((xColumns - robot_start(1)).^2 + (yRows - robot_start(2)).^2);
-% Find the closest
+% Trovo il più vicino
 [minDistance, indexOfMin] = min(distances);
-% Find the coordinates
+% .. e le sue coordinate
 GVD_start(1) = xColumns(indexOfMin);
 GVD_start(2) = yRows(indexOfMin);
 
-% Find distances from (x2, y2) to all other points.
 distances2 = sqrt((xColumns - robot_end(1)).^2 + (yRows - robot_end(2)).^2);
-% Find the closest
 [minDistance2, indexOfMin2] = min(distances2);
-% Find the coordinates
 GVD_end(1) = xColumns(indexOfMin2);
 GVD_end(2) = yRows(indexOfMin2);
 
  
-
 D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
@@ -258,7 +251,6 @@ plot(robot_start(1),robot_start(2),'d','MarkerSize',10)
 
 plot(robot_end(1),robot_end(2),'d','MarkerSize',10)
 
-% percorso=[robot_start(1) robot_start(2);percorso;robot_end(1), robot_end(2)];
 
 plot(percorso(:,1),percorso(:,2),'o','color','r')
 hold on

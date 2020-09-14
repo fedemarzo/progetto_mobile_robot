@@ -168,11 +168,15 @@ end
         C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
         C_space = bwdist(1-C_space);
 
-% Calcolo del diagramma di Voronoi con le funzioni del2 e
+% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale. del2
+% restituisce una matrice di uguale dimensione di C Space dove ogni
+% elemento è ottenuto come differenza dell'elemento di C space meno la
+% media dei 4 vicini. 
         [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
         %i valori sono minori della metà del range sono settati a 0, quando
-        %maggiori sono settati a 1. 
-        %Remove spurious pixels
+        %maggiori sono settati a 1. E' un valore logico, quindi 1 quando è
+        %vero e 0 quando è falso
+        %Filtraggio del diagramma di Voronoi appena calcolato 
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
@@ -181,10 +185,7 @@ end
 cc = regionprops(GVD,'Area');
 maxarea = max([cc.Area]);
 GVD = bwareaopen(GVD,maxarea);
-        
-     
-
-        
+           
 %% Operazioni sul diagramma di Voronoi
 
 %Trovo nearest point 
@@ -213,7 +214,6 @@ GVD_end(1) = xColumns(indexOfMin2);
 GVD_end(2) = yRows(indexOfMin2);
 
  
-
 D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
