@@ -6,7 +6,6 @@ clc
 %% Generazione del workspace e degli ostacoli 
 
 raggio_disco = 20;
-clearance = 1;
 % CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
 % hfig=figure(1); % Plot  Workspace
@@ -158,22 +157,19 @@ end
     
     
 %% Generazione del diagramma di Voronoi
+
+%Applicazione della growing procedure per la costruzione del C Space
+
         C_space= imdilate(~stanza, strel('disk',raggio_disco));
         C_space=~C_space;
         C_space(1:raggio_disco,:)=0;
         C_space(:,1:raggio_disco)=0;
         C_space(stanza_dim(1)-raggio_disco:stanza_dim(1),:)=0;
         C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
-        
+        C_space = bwdist(1-C_space);
 
-        updated_map = algoritmo_minkowski(raggio_disco, clearance, C_space);
-        updated_map_robot = updated_map(:,:,t,1);
-        
-        GVD_temp = updated_map_robot;
-        updated_map_robot_temp = bwdist(1-GVD_temp);
-
-
-        [GVD]= rescale(del2(updated_map_robot_temp))<0.5; % con questo comando quando 
+% Calcolo del diagramma di Voronoi con le funzioni del2 e
+        [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
         %i valori sono minori della metà del range sono settati a 0, quando
         %maggiori sono settati a 1. 
         %Remove spurious pixels
@@ -218,15 +214,6 @@ GVD_end(2) = yRows(indexOfMin2);
 
  
 
-
-
-
-% figure(3)
-% 
-% hold on
-% % plot(GVD_start(1), GVD_start(2), 'g*', 'MarkerSize', 15)
-% % plot(GVD_end(1), GVD_end(2), 'g*', 'MarkerSize', 15)
-% hold off
 D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
@@ -236,19 +223,14 @@ D = round(D * 8) / 8;
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
 
-% myColormap=[1,1,1;1,0,0];
-% skeleton_path_color=ind2rgb(skeleton_path,myColormap);
-
 [xp,yp]=find(skeleton_path==1);
 percorso=[yp,xp];
-
-
 
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
 
 if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
-    msgbox('Percorso non ammissibile')
+    msgbox('Percorso non trovato')
     close (figure(3), figure(2))   
 else
 
@@ -261,38 +243,8 @@ plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
 plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 hold off
 path_length = D(skeleton_path);
-path_length = path_length(1);
+path_length = path_length(1)
 
-% percorso_prova=percorso;
-% if GVD_start~=percorso_prova(1,:)
-% [tf,index]=ismember(GVD_start,percorso_prova,'rows');
-%  temp=percorso_prova(1,:);
-%  percorso_prova(1,:)=percorso_prova(index,:);
-%  percorso_prova(index,:)=temp;
-% end
-% 
-% % percorso_ret(1,:)=robot_start;
-% % percorso_ret(2,:)=GVD_start;
-% 
-% for i=1:1:(size(percorso_prova,1))-1
-%     for j=(i+1):1:(size(percorso_prova,1))-1
-%         
-%         X=[percorso_prova(i,:); percorso_prova(j,:)];
-%         dist(j)=pdist(X);
-%                       
-%     end
-%     
-%     [min_start,index_start]=min(dist);
-%     temp=percorso_prova(i+1,:);
-%         percorso_prova(i+1,:)=percorso_prova(index_start,:);
-%         percorso_prova(index_start,:)=temp;
-% end
-% 
-% 
-% idx = randsample(numel(percorso_prova(:,1)), numel(percorso_prova(:,1))); 
-% percorso_prova(:,1) = percorso_prova(idx,1); 
-% percorso_prova(:,2) = percorso_prova(idx,2);
-% plot(percorso_prova(idx,1),percorso_prova(idx,2),'*')
 
 figure(2)
 imshow(~(~C_space|GVD))
@@ -302,16 +254,16 @@ plot(GVD_start(1),GVD_start(2),'*','MarkerSize',8)
 
 plot(GVD_end(1),GVD_end(2),'*','MarkerSize',8)
 
-plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
+plot(robot_start(1),robot_start(2),'d','MarkerSize',10)
 
-plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
+plot(robot_end(1),robot_end(2),'d','MarkerSize',10)
 
 % percorso=[robot_start(1) robot_start(2);percorso;robot_end(1), robot_end(2)];
 
 plot(percorso(:,1),percorso(:,2),'o','color','r')
 hold on
-plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','LineWidth',3)
-plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',3)
+plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','LineWidth',6)
+plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',6)
 
 
 %% ANIMAZIONE 

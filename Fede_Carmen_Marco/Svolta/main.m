@@ -6,7 +6,6 @@ clc
 %% Generazione del workspace e degli ostacoli 
 
 raggio_disco = 20;
-clearance = 1;
 % CVD_robots = [];
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
 % hfig=figure(1); % Plot  Workspace
@@ -158,22 +157,19 @@ end
     
     
 %% Generazione del diagramma di Voronoi
+
+%Applicazione della growing procedure per la costruzione del C Space
+
         C_space= imdilate(~stanza, strel('disk',raggio_disco));
         C_space=~C_space;
         C_space(1:raggio_disco,:)=0;
         C_space(:,1:raggio_disco)=0;
         C_space(stanza_dim(1)-raggio_disco:stanza_dim(1),:)=0;
         C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
-        
+        C_space = bwdist(1-C_space);
 
-        updated_map = algoritmo_minkowski(raggio_disco, clearance, C_space);
-        updated_map_robot = updated_map(:,:,t,1);
-        
-        GVD_temp = updated_map_robot;
-        updated_map_robot_temp = bwdist(1-GVD_temp);
-
-
-        [GVD]= rescale(del2(updated_map_robot_temp))<0.5; % con questo comando quando 
+% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale.
+        [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
         %i valori sono minori della metà del range sono settati a 0, quando
         %maggiori sono settati a 1. 
         %Remove spurious pixels
@@ -234,7 +230,7 @@ check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
 
 if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
-    msgbox('Percorso non ammissibile')
+    msgbox('Percorso non trovato')
     close (figure(3), figure(2))   
 else
 
@@ -247,7 +243,7 @@ plot(robot_start(1),robot_start(2),'d','MarkerSize',8)
 plot(robot_end(1),robot_end(2),'d','MarkerSize',8)
 hold off
 path_length = D(skeleton_path);
-path_length = path_length(1);
+path_length = path_length(1)
 
 
 figure(2)
