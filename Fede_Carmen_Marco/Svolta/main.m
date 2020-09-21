@@ -194,13 +194,7 @@ end
 
 %Trovo nearest point 
 
-boundaries = bwboundaries(GVD);
-boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
-% Trovo le righe degli elementi di bordo del diagramma
-yRows = boundaries(:, 1);
-% Trovo le colonne
-xColumns = boundaries(:, 2);
-% Distanze da tutti gli altri punti .
+[yRows,xColumns]=find(GVD==1);
 distances = sqrt((xColumns - robot_start(1)).^2 + (yRows - robot_start(2)).^2);
 % Trovo il più vicino
 [minDistance, indexOfMin] = min(distances);
