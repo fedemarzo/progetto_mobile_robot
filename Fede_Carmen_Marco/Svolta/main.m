@@ -5,7 +5,7 @@ clc
 %dimensione stanza come input e anche robot size
 %% Generazione del workspace e degli ostacoli 
 
-raggio_disco = 20;
+raggio_disco = 10;
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
 
 numero_ostacoli=input('Inserire il numero di ostacoli: ');
@@ -19,9 +19,42 @@ disp('Disegnare i poligoni sulla figura. Doppio click su ogni poligono dopo aver
 save('obstacle_space.mat','stanza');
 stanza = load('obstacle_space.mat');
 stanza = stanza.stanza;
+stanza_dim = size(stanza);
 imshow(stanza,[]); % Mostro il nuovo workspace aggiornato
 
 hold on;
+
+
+%% Generazione del diagramma di Voronoi
+
+%Applicazione della growing procedure per la costruzione del C Space
+
+        C_space= imdilate(~stanza, strel('disk',raggio_disco));
+        C_space=~C_space;
+        C_space(1:raggio_disco,:)=0;
+        C_space(:,1:raggio_disco)=0;
+        C_space(stanza_dim(1)-raggio_disco:stanza_dim(1),:)=0;
+        C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
+        C_space = bwdist(1-C_space);
+
+% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale. del2
+% restituisce una matrice di uguale dimensione di C Space dove ogni
+% elemento è ottenuto come differenza dell'elemento di C space meno la
+% media dei 4 vicini. 
+        [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
+        %i valori sono minori della metà del range sono settati a 0, quando
+        %maggiori sono settati a 1. E' un valore logico, quindi 1 quando è
+        %vero e 0 quando è falso
+        %Filtraggio del diagramma di Voronoi appena calcolato 
+        GVD = bwmorph(GVD,'spur');
+        GVD = bwmorph(GVD,'thin');
+        GVD = bwmorph(GVD,'clean');
+%         GVD=bwareaopen(GVD,20);
+   
+cc = regionprops(GVD,'Area');
+maxarea = max([cc.Area]);
+GVD = bwareaopen(GVD,maxarea);
+
 %% Definizione della start pose
 
 matrice_robot=zeros(500,500);
@@ -31,10 +64,13 @@ robot_end = [];
 
 t=1;% Istante di tempo.
 
+bool=true;
+risposta_utente=bool;
+
+while(risposta_utente==true)
 % Seleziono il nodo di partenza del robot
     disp('Selezionare la posizione di partenza: ');
     start_point = ginput(1);
-    stanza_dim = size(stanza);
     robot_start=start_point;
     
    
@@ -151,37 +187,8 @@ end
     
     % Mostro le posizioni di partenza e arrivo per l'algoritmo di planning
     plot(end_point(:,1),end_point(:,2),'g--o');
-    
-    
-%% Generazione del diagramma di Voronoi
+       
 
-%Applicazione della growing procedure per la costruzione del C Space
-
-        C_space= imdilate(~stanza, strel('disk',raggio_disco));
-        C_space=~C_space;
-        C_space(1:raggio_disco,:)=0;
-        C_space(:,1:raggio_disco)=0;
-        C_space(stanza_dim(1)-raggio_disco:stanza_dim(1),:)=0;
-        C_space(:,stanza_dim(1)-raggio_disco:stanza_dim(1))=0;
-        C_space = bwdist(1-C_space);
-
-% Calcolo del diagramma di Voronoi con le funzioni del2 e rescale. del2
-% restituisce una matrice di uguale dimensione di C Space dove ogni
-% elemento è ottenuto come differenza dell'elemento di C space meno la
-% media dei 4 vicini. 
-        [GVD]= rescale(del2(C_space))<0.5; % con questo comando quando 
-        %i valori sono minori della metà del range sono settati a 0, quando
-        %maggiori sono settati a 1. E' un valore logico, quindi 1 quando è
-        %vero e 0 quando è falso
-        %Filtraggio del diagramma di Voronoi appena calcolato 
-        GVD = bwmorph(GVD,'spur');
-        GVD = bwmorph(GVD,'thin');
-        GVD = bwmorph(GVD,'clean');
-%         GVD=bwareaopen(GVD,20);
-   
-cc = regionprops(GVD,'Area');
-maxarea = max([cc.Area]);
-GVD = bwareaopen(GVD,maxarea);
            
 %% Operazioni sul diagramma di Voronoi
 
@@ -268,4 +275,23 @@ plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth'
 %     drawnow, pause(0.5)
 % end
 % set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
+end
+
+% dims = [1 50];
+% prompt = {'Si','No'};
+% dlgtitle = 'Vuoi inserire altri punti di partenza e arrivo?';
+% dati = inputdlg(prompt,dlgtitle,dims);
+% Si=dati{1};
+% No=dati{2};
+% if 
+%     risposta_utente==Si
+ 
+answer = questdlg('Vorresti modificare le posizioni di arrivo e partenza del robot?', 'Choice Menu','Si','No','No');
+switch answer
+case 'Si'
+risposta_utente = true;
+case 'No'
+risposta_utente=false;
+end
+
 end
