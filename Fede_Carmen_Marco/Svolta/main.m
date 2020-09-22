@@ -49,11 +49,11 @@ hold on;
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
-%         GVD=bwareaopen(GVD,20);
+         GVD=bwareaopen(GVD,500);
    
-cc = regionprops(GVD,'Area');
-maxarea = max([cc.Area]);
-GVD = bwareaopen(GVD,maxarea);
+% cc = regionprops(GVD,'Area');
+% maxarea = max([cc.Area]);
+% GVD = bwareaopen(GVD,maxarea);
 
 %% Definizione della start pose
 
@@ -222,8 +222,10 @@ percorso=[yp,xp];
 
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
+path_length = D(skeleton_path);
+path_length = path_length(1);
 
-if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
+if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2 || path_length==Inf)
     msgbox('Percorso non trovato')
     close (figure(3), figure(2))   
 else
@@ -257,9 +259,7 @@ plot(percorso(:,1),percorso(:,2),'o','color','r')
 hold on
 plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','LineWidth',6)
 plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',6)
-
-
-%% Multi-query
+end
  
 answer = questdlg('Vorresti modificare le posizioni di arrivo e partenza del robot?', 'Choice Menu','Si','No','No');
 switch answer

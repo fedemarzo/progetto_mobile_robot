@@ -5,7 +5,7 @@ clc
 %dimensione stanza come input e anche robot size
 %% Generazione del workspace e degli ostacoli 
 
-raggio_disco = 20;
+raggio_disco = 10;
 stanza=ones(500,500); % Creo il workspace, inizializzando una matrice di 1 di dimensione 500x500
 
 numero_ostacoli=input('Inserire il numero di ostacoli: ');
@@ -49,11 +49,11 @@ hold on;
         GVD = bwmorph(GVD,'spur');
         GVD = bwmorph(GVD,'thin');
         GVD = bwmorph(GVD,'clean');
-%         GVD=bwareaopen(GVD,20);
+         GVD=bwareaopen(GVD,500);
    
-cc = regionprops(GVD,'Area');
-maxarea = max([cc.Area]);
-GVD = bwareaopen(GVD,maxarea);
+% cc = regionprops(GVD,'Area');
+% maxarea = max([cc.Area]);
+% GVD = bwareaopen(GVD,maxarea);
 
 %% Definizione della start pose
 
@@ -71,7 +71,6 @@ while(risposta_utente==true)
 % Seleziono il nodo di partenza del robot
     disp('Selezionare la posizione di partenza: ');
     start_point = ginput(1);
-    
     robot_start=start_point;
     
    
@@ -195,13 +194,7 @@ end
 
 %Trovo nearest point 
 
-boundaries = bwboundaries(GVD);
-boundaries = boundaries{1}; % Extract from cell. Data is [rows, columns], not [x, y]
-% Trovo le righe degli elementi di bordo del diagramma
-yRows = boundaries(:, 1);
-% Trovo le colonne
-xColumns = boundaries(:, 2);
-% Distanze da tutti gli altri punti .
+[yRows,xColumns]=find(GVD==1);
 distances = sqrt((xColumns - robot_start(1)).^2 + (yRows - robot_start(2)).^2);
 % Trovo il più vicino
 [minDistance, indexOfMin] = min(distances);
@@ -219,7 +212,7 @@ D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
 D = D1 + D2;
-D = round(D * 8) / 8;
+D = round(D);
 
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
@@ -229,6 +222,8 @@ percorso=[yp,xp];
 
 check1=[GVD_start ; robot_start];
 check2=[GVD_end ; robot_end];
+path_length = D(skeleton_path);
+path_length = path_length(1);
 
 if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2)
     msgbox('Percorso non trovato')
@@ -264,28 +259,7 @@ plot(percorso(:,1),percorso(:,2),'o','color','r')
 hold on
 plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','LineWidth',6)
 plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',6)
-
-
-%% ANIMAZIONE 
-
-% figure (4)
-% imshow(P)
-% hold on
-% for i=1:5:size(percorso,1)
-%     plot(percorso(i,1),percorso(i,2),'o','MarkerSize',9),hold all
-%     drawnow, pause(0.5)
-% end
-% set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
 end
-
-% dims = [1 50];
-% prompt = {'Si','No'};
-% dlgtitle = 'Vuoi inserire altri punti di partenza e arrivo?';
-% dati = inputdlg(prompt,dlgtitle,dims);
-% Si=dati{1};
-% No=dati{2};
-% if 
-%     risposta_utente==Si
  
 answer = questdlg('Vorresti modificare le posizioni di arrivo e partenza del robot?', 'Choice Menu','Si','No','No');
 switch answer
