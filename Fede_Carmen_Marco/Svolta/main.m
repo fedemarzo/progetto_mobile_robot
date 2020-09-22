@@ -212,7 +212,7 @@ D1 = bwdistgeodesic(GVD, GVD_start(1), GVD_start(2), 'quasi-euclidean');
 D2 = bwdistgeodesic(GVD, GVD_end(1), GVD_end(2), 'quasi-euclidean');
 
 D = D1 + D2;
-D = round(D * 8) / 8;
+D = round(D);
 
 D(isnan(D)) = inf;
 skeleton_path = imregionalmin(D);
@@ -259,26 +259,7 @@ plot([GVD_start(1),robot_start(1)],[GVD_start(2),robot_start(2)],'color','r','Li
 plot([GVD_end(1),robot_end(1)],[GVD_end(2),robot_end(2)],'color','r','LineWidth',6)
 
 
-%% ANIMAZIONE 
-
-% figure (4)
-% imshow(P)
-% hold on
-% for i=1:5:size(percorso,1)
-%     plot(percorso(i,1),percorso(i,2),'o','MarkerSize',9),hold all
-%     drawnow, pause(0.5)
-% end
-% set(gca,'XLim',[0 stanza_dim(1)],'YLim',[0 stanza_dim(2)]); grid on
-end
-
-% dims = [1 50];
-% prompt = {'Si','No'};
-% dlgtitle = 'Vuoi inserire altri punti di partenza e arrivo?';
-% dati = inputdlg(prompt,dlgtitle,dims);
-% Si=dati{1};
-% No=dati{2};
-% if 
-%     risposta_utente==Si
+%% Multi-query
  
 answer = questdlg('Vorresti modificare le posizioni di arrivo e partenza del robot?', 'Choice Menu','Si','No','No');
 switch answer
