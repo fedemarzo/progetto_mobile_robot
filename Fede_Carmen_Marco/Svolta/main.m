@@ -226,10 +226,10 @@ path_length = D(skeleton_path);
 path_length = path_length(1);
 
 if (pdist(check1)>stanza_dim(1)*0.2 || pdist(check2)>stanza_dim(1)*0.2 || path_length==Inf)
+    imshow(~(~C_space|GVD))
     msgbox('Percorso non trovato')
-    close (figure(3), figure(2))   
 else
-
+    
 P = imoverlay(GVD, imdilate(skeleton_path, ones(3,3)), [1 0 0] );
 imshow(P, 'InitialMagnification', 200)
 hold on
@@ -242,7 +242,6 @@ path_length = D(skeleton_path);
 path_length = path_length(1)
 
 
-figure(2)
 imshow(~(~C_space|GVD))
 
 hold on
