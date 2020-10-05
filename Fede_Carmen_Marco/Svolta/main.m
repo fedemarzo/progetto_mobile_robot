@@ -56,7 +56,7 @@ C_space_dist = bwdist(1-C_space); % matrice delle distanze di ogni pixel dal pix
         GVD = bwmorph(GVD,'spur'); % rimuove i pixel finali delle linee senza rimuovere completamente gli oggetti piccoli 
         GVD = bwmorph(GVD,'thin'); % fa in modo che le file di GVD siano formate da una sola linea di 1
         GVD = bwmorph(GVD,'clean');% rimuove i pixel isolati ( 1 circondati da 0 ) 
-        GVD=bwareaopen(GVD,30); % rimuove gli oggetti ( i blocchi di 1) isolati con meno di un certo numero di pixel ( 500 nel caso in esame)
+        GVD=bwareaopen(GVD,100); % rimuove gli oggetti ( i blocchi di 1) isolati con meno di un certo numero di pixel ( 500 nel caso in esame)
 
 %% Definizione della start pose
 matrice_robot=zeros(500,500);
